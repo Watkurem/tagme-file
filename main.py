@@ -71,6 +71,10 @@ def main():
     # If it exists, do nothing, it's fine
     os.makedirs(HOME, mode=0o700, exist_ok=True)
 
+    if sys.argv[1] == "add":
+        for file in sys.argv[2:]:
+            sha3_hash = store(file)
+
 
 if __name__ == "__main__":
     main()
