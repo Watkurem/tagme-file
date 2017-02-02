@@ -10,6 +10,8 @@ This module should most likely not be imported.
 
 import hashlib
 import os
+import shutil
+import sys
 
 HOME = os.path.expanduser("~/.tagme-file/")
 STORAGE = HOME + "storage/"
@@ -34,7 +36,33 @@ def hash_file_sha3_512(file):
                 break
             hasher.update(data)
 
-    return int(hasher.hexdigest(), 16)
+    return hasher.hexdigest()
+
+
+def store(file):
+    """Put a file into storage and return it's sha3_512 hash digest as int
+
+    Path for a file in storage is generated as so:
+    STORAGE/XX/YY/ZZZ...
+    where XX are first byte of the hash in hex notation, YY are second byte,
+    and ZZZ... (filename) are other 62 bytes.
+
+    Int is used because this way digests need less memory to store. Smaller
+    hash size can be used too, of course, but that is simply not as fun.
+
+    file: path to file (usable with open())
+
+    return: hash of the file as int
+    """
+    str_h = hash_file_sha3_512(file)
+
+    prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
+    store_file = STORAGE + prefix + str_h[4:]
+
+    os.makedirs(STORAGE + prefix, mode=0o700, exist_ok=True)
+    shutil.copy2(file, store_file)
+
+    return int(str_h, 16)
 
 
 def main():
