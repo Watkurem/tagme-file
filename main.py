@@ -11,6 +11,7 @@ This module should most likely not be imported.
 import os
 
 HOME = os.path.expanduser("~/.tagme-file")
+STORAGE = HOME + "/storage"
 
 
 def main():
