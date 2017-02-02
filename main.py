@@ -15,6 +15,8 @@ HOME = os.path.expanduser("~/.tagme-file")
 
 def main():
     """Runs the tagme-file program; entry point."""
+    # Create the home directory if it does not exist.
+    # If it exists, do nothing, it's fine
     os.makedirs(HOME, mode=0o700, exist_ok=True)
 
 
