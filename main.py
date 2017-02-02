@@ -3,6 +3,7 @@
 
 
 def main():
+    """Runs the tagme-file program; entry point."""
     print("Test!")
 
 
