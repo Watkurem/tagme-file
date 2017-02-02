@@ -10,10 +10,12 @@ This module should most likely not be imported.
 
 import os
 
+HOME = os.path.expanduser("~/.tagme-file")
+
 
 def main():
     """Runs the tagme-file program; entry point."""
-    os.makedirs(os.path.expanduser("~/.tagme-file"), mode=0o700, exist_ok=True)
+    os.makedirs(HOME, mode=0o700, exist_ok=True)
 
 
 if __name__ == "__main__":
