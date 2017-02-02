@@ -11,8 +11,8 @@ This module should most likely not be imported.
 import hashlib
 import os
 
-HOME = os.path.expanduser("~/.tagme-file")
-STORAGE = HOME + "/storage"
+HOME = os.path.expanduser("~/.tagme-file/")
+STORAGE = HOME + "storage/"
 HASH_BUFFER_SIZE = 2**20  # 1 MiB
 
 
