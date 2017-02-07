@@ -29,13 +29,13 @@ else:
 
 
 def hash_file_sha3_512(file):
-    """Perform sha3_512 hash on an arbitrary file and return the digest
+    """Perform sha3_512 hash on an arbitrary file and return the digest.
 
     File reading is buffered, so even super huge files can be hashed easily.
 
-    file: path to file (usable with open())
+    file: path to file (usable with open()).
 
-    return: hash of the file as int
+    return: hash of the file as int.
     """
     hasher = hashlib.sha3_512()
 
@@ -50,7 +50,7 @@ def hash_file_sha3_512(file):
 
 
 def store(file):
-    """Put a file into storage and return it's sha3_512 hash digest as int
+    """Put a file into storage and return it's sha3_512 hash digest as int.
 
     Path for a file in storage is generated as so:
     STORAGE/XX/YY/ZZZ...
@@ -60,9 +60,9 @@ def store(file):
     Int is used because this way digests need less memory to store. Smaller
     hash size can be used too, of course, but that is simply not as fun.
 
-    file: path to file (usable with open())
+    file: path to file (usable with open()).
 
-    return: hash of the file as int
+    return: hash of the file as int.
     """
     str_h = hash_file_sha3_512(file)
 
@@ -76,7 +76,7 @@ def store(file):
 
 
 def tag(dg, t):
-    """Perform all actions necessary to associate a tag with a digest
+    """Perform all actions necessary to associate a tag with a digest.
 
     Actually, no checking is done, so it associates an arbitrary int with an
     arbitrary string.
@@ -91,8 +91,8 @@ def tag(dg, t):
     already there, appends a new digest to the list associated with it if the
     digest is not there yet.
 
-    dg: a digest, int, no checking is done, don't shoot yourself in the foot
-    t: a tag, string, same
+    dg: a digest, int, no checking is done, don't shoot yourself in the foot.
+    t: a tag, string, same.
     """
     try:
         if t not in files[dg]:
@@ -108,14 +108,20 @@ def tag(dg, t):
 
 
 def describe_files():
-    """Writes out a list of all files (as hex digests) with their tags"""
+    """Perform 'describe-files' command.
+
+    Write out a list of all files (as hex digests) with their tags.
+    """
     global files
     for file, tags in files.items():
         print("{:0128x}: {}".format(file, ", ".join(tags)))
 
 
 def describe_tags():
-    """Writes out a list of all tags with their files (as hex digests)"""
+    """Perform 'describe-tags' command.
+
+    Write out a list of all tags with their files (as hex digests).
+    """
     global tags
     for tag, files in tags.items():
         hex_digests = ["{:0128x}".format(file) for file in files]
@@ -123,7 +129,7 @@ def describe_tags():
 
 
 def main():
-    """Runs the tagme-file program; entry point."""
+    """Run the tagme-file program; entry point."""
     # Create the home directory if it does not exist.
     # If it exists, do nothing, it's fine
     os.makedirs(HOME, mode=0o700, exist_ok=True)
