@@ -76,22 +76,26 @@ def tag(dg, t):
 
     Adds a new digest to the 'files' dict, if it is not there yet, and assigns
     a list of tags (one tag in this case) to it. Otherwise, if the digest is
-    already there, appends a new tag to the list associated with it.
+    already there, appends a new tag to the list associated with it if the tag
+    is not there yet.
 
     Adds a new tag to the 'tags' dict, if it is not there yet, and assigns a
     list of digests (one digest in this case) to it. Otherwise, if the tag is
-    already there, appends a new digest to the list associated with it.
+    already there, appends a new digest to the list associated with it if the
+    digest is not there yet.
 
     dg: a digest, int, no checking is done, don't shoot yourself in the foot
     t: a tag, string, same
     """
     try:
-        files[dg].append(t)
+        if t not in files[dg]:
+            files[dg].append(t)
     except KeyError:
         files[dg] = [t]
 
     try:
-        tags[t].append(dg)
+        if dg not in tags[t]:
+            tags[t].append(dg)
     except KeyError:
         tags[t] = [dg]
 
