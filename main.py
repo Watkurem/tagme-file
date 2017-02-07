@@ -75,7 +75,7 @@ def store(file):
     return int(str_h, 16)
 
 
-def tag(dg, t):
+def add_tag(dg, t):
     """Perform all actions necessary to associate a tag with a digest.
 
     Actually, no checking is done, so it associates an arbitrary int with an
@@ -107,7 +107,7 @@ def tag(dg, t):
         tags[t] = [dg]
 
 
-def describe_files():
+def cmd_describe_files():
     """Perform 'describe-files' command.
 
     Write out a list of all files (as hex digests) with their tags.
@@ -117,7 +117,7 @@ def describe_files():
         print("{:0128x}: {}".format(file, ", ".join(tags)))
 
 
-def describe_tags():
+def cmd_describe_tags():
     """Perform 'describe-tags' command.
 
     Write out a list of all tags with their files (as hex digests).
@@ -139,11 +139,11 @@ def main():
     if cmd == "add":
         for file in sys.argv[2:]:
             sha3_hash = store(file)
-            tag(sha3_hash, os.path.basename(file))
+            add_tag(sha3_hash, os.path.basename(file))
     elif cmd == "describe-files":
-        describe_files()
+        cmd_describe_files()
     elif cmd == "describe-tags":
-        describe_tags()
+        cmd_describe_tags()
 
     pickle.dump(files, open(FILES, "wb"))
     pickle.dump(tags, open(TAGS, "wb"))
