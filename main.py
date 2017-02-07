@@ -68,6 +68,34 @@ def store(file):
     return int(str_h, 16)
 
 
+def tag(dg, t):
+    """Perform all actions necessary to associate a tag with a digest
+
+    Actually, no checking is done, so it associates an arbitrary int with an
+    arbitrary string.
+
+    Adds a new digest to the 'files' dict, if it is not there yet, and assigns
+    a list of tags (one tag in this case) to it. Otherwise, if the digest is
+    already there, appends a new tag to the list associated with it.
+
+    Adds a new tag to the 'tags' dict, if it is not there yet, and assigns a
+    list of digests (one digest in this case) to it. Otherwise, if the tag is
+    already there, appends a new digest to the list associated with it.
+
+    dg: a digest, int, no checking is done, don't shoot yourself in the foot
+    t: a tag, string, same
+    """
+    try:
+        files[dg].append(t)
+    except KeyError:
+        files[dg] = [t]
+
+    try:
+        tags[t].append(dg)
+    except KeyError:
+        tags[t] = [dg]
+
+
 def main():
     """Runs the tagme-file program; entry point."""
     # Create the home directory if it does not exist.
