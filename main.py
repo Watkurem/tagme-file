@@ -107,6 +107,13 @@ def tag(dg, t):
         tags[t] = [dg]
 
 
+def describe_files():
+    """Writes out a list of all files (as hex digests) with their tags"""
+    global files
+    for file, tags in files.items():
+        print("{:0128x}: {}".format(file, ", ".join(tags)))
+
+
 def main():
     """Runs the tagme-file program; entry point."""
     # Create the home directory if it does not exist.
@@ -119,6 +126,8 @@ def main():
         for file in sys.argv[2:]:
             sha3_hash = store(file)
             tag(sha3_hash, os.path.basename(file))
+    elif cmd == "describe-files":
+        describe_files()
 
     pickle.dump(files, open(FILES, "wb"))
     pickle.dump(tags, open(TAGS, "wb"))
