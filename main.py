@@ -17,6 +17,9 @@ HOME = os.path.expanduser("~/.tagme-file/")
 STORAGE = HOME + "storage/"
 HASH_BUFFER_SIZE = 2**20  # 1 MiB
 
+files = {}
+tags = {}
+
 
 def hash_file_sha3_512(file):
     """Perform sha3_512 hash on an arbitrary file and return the digest
