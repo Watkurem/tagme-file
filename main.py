@@ -10,15 +10,22 @@ This module should most likely not be imported.
 
 import hashlib
 import os
+import pickle
 import shutil
 import sys
 
 HOME = os.path.expanduser("~/.tagme-file/")
+FILES = HOME + "files.tmf"
+TAGS = HOME + "tags.tmf"
 STORAGE = HOME + "storage/"
 HASH_BUFFER_SIZE = 2**20  # 1 MiB
 
-files = {}
-tags = {}
+if (os.path.exists(FILES) and os.path.exists(TAGS)):
+    files = pickle.load(open(FILES, "rb"))
+    tags = pickle.load(open(TAGS, "rb"))
+else:
+    files = {}
+    tags = {}
 
 
 def hash_file_sha3_512(file):
@@ -110,6 +117,9 @@ def main():
         for file in sys.argv[2:]:
             sha3_hash = store(file)
             tag(sha3_hash, os.path.basename(file))
+
+    pickle.dump(files, open(FILES, "wb"))
+    pickle.dump(tags, open(TAGS, "wb"))
 
 
 if __name__ == "__main__":
