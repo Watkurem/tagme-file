@@ -105,6 +105,7 @@ def main():
     if sys.argv[1] == "add":
         for file in sys.argv[2:]:
             sha3_hash = store(file)
+            tag(sha3_hash, os.path.basename(file))
 
 
 if __name__ == "__main__":
