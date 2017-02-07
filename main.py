@@ -140,6 +140,16 @@ def cmd_describe_tags():
         print("{:32}: {}".format(tag, ", ".join(hex_digests)))
 
 
+def cmd_tag(str_digest, new_tags):
+    """Perform 'tag' command.
+
+    Add tags to given file (hex digest).
+    """
+    digest = int(str_digest, 16)
+    for tag in new_tags:
+        add_tag(digest, tag)
+
+
 def main():
     """Run the tagme-file program; entry point."""
     # Create the home directory if it does not exist.
@@ -154,6 +164,8 @@ def main():
         cmd_describe_files()
     elif cmd == "describe-tags":
         cmd_describe_tags()
+    elif cmd == "tag":
+        cmd_tag(sys.argv[2], sys.argv[3:])
 
     pickle.dump(files, open(FILES, "wb"))
     pickle.dump(tags, open(TAGS, "wb"))
