@@ -107,6 +107,18 @@ def add_tag(dg, t):
         tags[t] = [dg]
 
 
+def cmd_add(filenames):
+    """Perform 'add' command.
+
+    Put files in storage and add their filename as first tag.
+
+    filenames: list of filenames; should be valid paths.
+    """
+    for filename in filenames:
+        sha3_hash = store(filename)
+        add_tag(sha3_hash, os.path.basename(filename))
+
+
 def cmd_describe_files():
     """Perform 'describe-files' command.
 
@@ -137,9 +149,7 @@ def main():
     cmd = sys.argv[1]
 
     if cmd == "add":
-        for file in sys.argv[2:]:
-            sha3_hash = store(file)
-            add_tag(sha3_hash, os.path.basename(file))
+        cmd_add(sys.argv[2:])
     elif cmd == "describe-files":
         cmd_describe_files()
     elif cmd == "describe-tags":
