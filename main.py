@@ -75,6 +75,19 @@ def store(file):
     return int(str_h, 16)
 
 
+def file_stored(digest):
+    """Check if a file corresponding to given digest is in storage
+
+    return: bool
+    """
+    str_h = "{:0128x}".format(digest)
+
+    prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
+    stored_file = STORAGE + prefix + str_h[4:]
+
+    return os.path.exists(stored_file)
+
+
 def add_tag(dg, t):
     """Perform all actions necessary to associate a tag with a digest.
 
