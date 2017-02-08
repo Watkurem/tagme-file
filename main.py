@@ -217,6 +217,21 @@ def cmd_tag(str_digest, new_tags):
         add_tag(digest, tag)
 
 
+def cmd_remove(str_digests):
+    """Perform 'remove' command.
+
+    Remove all tags from given files and delete them from storage.
+
+    filenames: list of digests of files to remove.
+    """
+    for str_digest in str_digests:
+        digest = int(str_digest, 16)
+        unstore(digest)
+        for t in files[digest].copy():
+            del_tag(digest, t)
+        files.pop(digest)
+
+
 def main():
     """Run the tagme-file program; entry point."""
     os.umask(0o077)
@@ -235,6 +250,8 @@ def main():
         cmd_describe_tags()
     elif cmd == "tag":
         cmd_tag(sys.argv[2], sys.argv[3:])
+    elif cmd == "remove":
+        cmd_remove(sys.argv[2:])
 
     pickle.dump(files, open(FILES, "wb"))
     pickle.dump(tags, open(TAGS, "wb"))
