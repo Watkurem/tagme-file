@@ -67,10 +67,10 @@ def store(file):
     str_h = hash_file_sha3_512(file)
 
     prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
-    store_file = STORAGE + prefix + str_h[4:]
+    stored_file = STORAGE + prefix + str_h[4:]
 
     os.makedirs(STORAGE + prefix, mode=0o700, exist_ok=True)
-    shutil.copy2(file, store_file)
+    shutil.copy2(file, stored_file)
 
     return int(str_h, 16)
 
