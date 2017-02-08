@@ -183,7 +183,7 @@ def cmd_add(filenames):
     """
     for filename in filenames:
         sha3_hash = store(filename)
-        add_tag(sha3_hash, os.path.basename(filename))
+        add_tag(sha3_hash, "name/" + os.path.basename(filename))
 
 
 def cmd_describe_files():
