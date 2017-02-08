@@ -69,7 +69,7 @@ def store(file):
     prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
     stored_file = STORAGE + prefix + str_h[4:]
 
-    os.makedirs(STORAGE + prefix, mode=0o700, exist_ok=True)
+    os.makedirs(STORAGE + prefix, exist_ok=True)
     shutil.copy2(file, stored_file)
 
     return int(str_h, 16)
@@ -152,9 +152,11 @@ def cmd_tag(str_digest, new_tags):
 
 def main():
     """Run the tagme-file program; entry point."""
+    os.umask(0o077)
+
     # Create the home directory if it does not exist.
     # If it exists, do nothing, it's fine
-    os.makedirs(HOME, mode=0o700, exist_ok=True)
+    os.makedirs(HOME, exist_ok=True)
 
     cmd = sys.argv[1]
 
