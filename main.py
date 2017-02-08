@@ -75,6 +75,25 @@ def store(file):
     return int(str_h, 16)
 
 
+def unstore(digest):
+    """Remove a file corresponding to a digest from storage.
+
+    digest: a digest of file to unstore
+    """
+    str_h = "{:0128x}".format(digest)
+
+    prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
+    stored_file = STORAGE + prefix + str_h[4:]
+
+    try:
+        os.remove(stored_file)
+        os.removedirs(STORAGE + prefix)
+    except OSError as e:
+        if not (e.errno == 2 or
+                e.errno == 39):
+            raise
+
+
 def file_stored(digest):
     """Check if a file corresponding to given digest is in storage
 
