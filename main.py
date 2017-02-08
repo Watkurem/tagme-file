@@ -142,6 +142,38 @@ def add_tag(dg, t):
         tags[t] = [dg]
 
 
+def del_tag(dg, t):
+    """Perform all actions necessary to unassociate a tag from a digest.
+
+    Actually, no checking is done, so it unassociates an arbitrary int from an
+    arbitrary string.
+
+    Removes the tag from the digest's tag list and removes the digest from the
+    tag's digest list. If latter becomes empty as a result, removes the tag
+    from 'tags' dict.
+
+    Take note that a tag with no digests will be deleted, while a digest with
+    no tags will be left alone. This is intended behaviour.
+
+    dg: a digest, int, no checking is done, don't shoot yourself in the foot.
+    t: a tag, string, same.
+    """
+    try:
+        if t in files[dg]:
+            files[dg].remove(t)
+    except KeyError:
+        pass
+
+    try:
+        if dg in tags[t]:
+            tags[t].remove(dg)
+    except KeyError:
+        pass
+
+    if not tags[t]:
+        tags.pop(t)
+
+
 def cmd_add(filenames):
     """Perform 'add' command.
 
