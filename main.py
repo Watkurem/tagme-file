@@ -107,6 +107,9 @@ def add_tag(dg, t):
     dg: a digest, int, no checking is done, don't shoot yourself in the foot.
     t: a tag, string, same.
     """
+    if not file_stored(dg):
+        return
+
     try:
         if t not in files[dg]:
             files[dg].append(t)
