@@ -54,8 +54,8 @@ def store(file):
 
     Path for a file in storage is generated as so:
     STORAGE/XX/YY/ZZZ...
-    where XX are first byte of the hash in hex notation, YY are second byte,
-    and ZZZ... (filename) are other 62 bytes.
+    where XX are first two characters of the string digest, YY are 3rd and 4th,
+    and ZZZ... (filename) are the rest.
 
     Int is used because this way digests need less memory to store. Smaller
     hash size can be used too, of course, but that is simply not as fun.
@@ -189,7 +189,7 @@ def cmd_add(filenames):
 def cmd_describe_files():
     """Perform 'describe-files' command.
 
-    Write out a list of all files (as hex digests) with their tags.
+    Write out a list of all files (as string digests) with their tags.
     """
     global files
     for file, tags in files.items():
@@ -199,7 +199,7 @@ def cmd_describe_files():
 def cmd_describe_tags():
     """Perform 'describe-tags' command.
 
-    Write out a list of all tags with their files (as hex digests).
+    Write out a list of all tags with their files (as string digests).
     """
     global tags
     for tag, files in tags.items():
@@ -210,7 +210,9 @@ def cmd_describe_tags():
 def cmd_tag(str_digest, new_tags):
     """Perform 'tag' command.
 
-    Add tags to given file (hex digest).
+    Add tags to given file (string digest).
+
+    str_digest:
     """
     digest = int(str_digest, 16)
     for tag in new_tags:
