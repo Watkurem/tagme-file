@@ -298,6 +298,7 @@ def cmd_describe_files():
     Does not change 'last'. This behaviour is intended.
     """
     global files
+
     for file, tags in files.items():
         print("{:0128x}: {}".format(file, ", ".join(tags)))
 
@@ -310,6 +311,7 @@ def cmd_describe_tags():
     Does not change 'last'. This behaviour is intended.
     """
     global tags
+
     for tag, files in tags.items():
         hex_digests = ["{:0128x}".format(file) for file in files]
         print("{:32}: {}".format(tag, ", ".join(hex_digests)))
@@ -327,6 +329,7 @@ def cmd_tag(str_digests, new_tags):
     str_digests: string containing digests of the files that the tags should be
                  added to, delimited by commas.
                  OR 'last' keyword.
+    new_tags: iterable of tags that should be added to the file(s).
     """
     if str_digests == 'last':
         digests = last
@@ -348,7 +351,7 @@ def cmd_remove(str_digests):
     files.
     Does not change 'last'.
 
-    filenames: list of digests of files to remove.
+    str_digests: list of digests of files to remove.
                  OR 'last' keyword.
     """
     if str_digests[0] == 'last':
@@ -372,6 +375,11 @@ def cmd_untag(str_digests, del_tags):
     Also accepts a special keyword 'last' to untag the most recently accessed
     files.
     Does not change 'last'.
+
+    str_digests: string containing digests of the files that the tags should be
+                 removed from, delimited by commas.
+                 OR 'last' keyword.
+    new_tags: iterable of tags that should be removed from the file(s).
     """
     if str_digests == 'last':
         digests = last
