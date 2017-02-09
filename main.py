@@ -297,16 +297,19 @@ def cmd_describe_tags():
         print("{:32}: {}".format(tag, ", ".join(hex_digests)))
 
 
-def cmd_tag(str_digest, new_tags):
+def cmd_tag(str_digests, new_tags):
     """Perform 'tag' command.
 
-    Add tags to given file (string digest).
+    Add tags to given files (string digests).
 
-    str_digest:
+    str_digests: string containing digests of the files that the tags should be
+                 added to, delimited by commas.
     """
-    digest = int(str_digest, 16)
-    for tag in new_tags:
-        add_tag(digest, tag)
+    str_digests = str_digests.split(',')
+    for str_digest in str_digests:
+        digest = int(str_digest, 16)
+        for tag in new_tags:
+            add_tag(digest, tag)
 
 
 def cmd_remove(str_digests):
