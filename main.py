@@ -11,6 +11,7 @@ This module should most likely not be imported.
 import hashlib
 import os
 import pickle
+import re
 import shutil
 import sys
 
@@ -172,6 +173,62 @@ def del_tag(dg, t):
 
     if not tags[t]:
         tags.pop(t)
+
+
+def to_rpn(query):
+    """Process a string infix query and return it's RPN representation.
+
+    Three operators are recognized:
+    - Nothing (or whitespace) between tokens means 'AND';
+    - '|' means 'OR';
+    - '!' means NOT (unary).
+    All other characters are considered parts of tokens (tags).
+
+    In RPN representation '+' is used for AND.
+
+    The precedence is as follows: | < + < !.
+
+    query: an infix query string, e.g. 't1 (t2|t3) | t4'
+
+    return: a list with RPN representation of the query, e.g.:
+            ['t1', 't2', 't3', '|', '+', 't4', '|']
+    """
+    output = []
+    stack = [None]
+
+    _input = re.split(r'\s+|(\||!|\(|\))', query)
+    input = [x for x in _input if (x != '' and x is not None)]
+
+    for x, next in zip(input, input[1:] + [None]):
+        if x == '!':
+            stack.append(x)
+        elif x =='|':
+            while stack[-1] in ('+', '|'):
+                output.append(stack.pop())
+            stack.append(x)
+        elif x == "(":
+            stack.append(x)
+        elif x == ")":
+            while stack[-1] != '(':
+                output.append(stack.pop())
+            stack.pop()
+            if next not in ['|', ')', None]:
+                while stack[-1] == '+':
+                    output.append(stack.pop())
+                stack.append('+')
+        else:
+            output.append(x)
+            while stack[-1] == '!':
+                output.append(stack.pop())
+            if next not in ['|', ')', None]:
+                while stack[-1] == '+':
+                    output.append(stack.pop())
+                stack.append('+')
+
+    while stack[-1] is not None:
+        output.append(stack.pop())
+
+    return output
 
 
 def cmd_add(filenames):
