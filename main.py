@@ -368,13 +368,18 @@ def cmd_remove(str_digests):
 
     Also accepts a special keyword 'last' to remove the most recently accessed
     files.
+    Also accepts a special keyword 'all'. Will remove all currently stored
+    files.
+
     Does not change 'last'.
 
     str_digests: list of digests of files to remove.
-                 OR 'last' keyword.
+                 OR keywords: 'last', 'all'.
     """
     if str_digests[0] == 'last':
         digests = last
+    elif str_digests[0] == 'all':
+        digests = files.keys()
     else:
         digests = (int(str_digest, 16)
                    for str_digest in str_digests)
