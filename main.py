@@ -231,6 +231,39 @@ def to_rpn(query):
     return output
 
 
+def select_by_tags(query):
+    """Return digests that match the query.
+
+    Three operators are recognized:
+    - Nothing (or whitespace) between tokens means 'AND';
+    - '|' means 'OR';
+    - '!' means NOT (unary).
+    All other characters are considered parts of tokens (tags).
+
+    query: a string query to match against
+
+    return: a list of matching digests
+    """
+    stack = []
+    all_files = files.keys()
+    query = to_rpn(query)
+
+    for x in query:
+        if x == '|':
+            stack.append(stack.pop() | stack.pop())
+        elif x == '+':
+            stack.append(stack.pop() & stack.pop())
+        elif x == '!':
+            stack.append(all_files - stack.pop())
+        else:
+            try:
+                stack.append(set(tags[x]))
+            except KeyError:
+                stack.append(set())
+
+    return list(stack.pop())
+
+
 def cmd_add(filenames):
     """Perform 'add' command.
 
