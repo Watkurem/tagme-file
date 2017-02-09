@@ -398,6 +398,9 @@ def cmd_untag(str_digests, del_tags):
 
     Also accepts a special keyword 'last' to untag the most recently accessed
     files.
+    Also accepts a special keyword 'all'. Will untag all currently stored
+    files.
+
     Does not change 'last'.
 
     str_digests: string containing digests of the files that the tags should be
@@ -407,6 +410,8 @@ def cmd_untag(str_digests, del_tags):
     """
     if str_digests == 'last':
         digests = last
+    elif str_digests == 'all':
+        digests = files.keys()
     else:
         digests = (int(str_digest, 16)
                    for str_digest in str_digests.split(','))
