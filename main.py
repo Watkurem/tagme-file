@@ -275,17 +275,27 @@ def cmd_add(filenames):
 
     Put files in storage and add their filename as first tag.
 
+    Changes 'last' to contain the (int) digests of the files added.
+
     filenames: list of filenames; should be valid paths.
     """
+    global last
+    tmp_last = []
+
     for filename in filenames:
         sha3_hash = store(filename)
         add_tag(sha3_hash, "name/" + os.path.basename(filename))
+        tmp_last.append(sha3_hash)
+
+    last = tuple(set(tmp_last))
 
 
 def cmd_describe_files():
     """Perform 'describe-files' command.
 
     Write out a list of all files (as string digests) with their tags.
+
+    Does not change 'last'. This behaviour is intended.
     """
     global files
     for file, tags in files.items():
@@ -296,6 +306,8 @@ def cmd_describe_tags():
     """Perform 'describe-tags' command.
 
     Write out a list of all tags with their files (as string digests).
+
+    Does not change 'last'. This behaviour is intended.
     """
     global tags
     for tag, files in tags.items():
@@ -308,12 +320,21 @@ def cmd_tag(str_digests, new_tags):
 
     Add tags to given files (string digests).
 
+    Also accepts a special keyword 'last' to tag the most recently accessed
+    files.
+    Does not change 'last'.
+
     str_digests: string containing digests of the files that the tags should be
                  added to, delimited by commas.
+                 OR 'last' keyword.
     """
-    str_digests = str_digests.split(',')
-    for str_digest in str_digests:
-        digest = int(str_digest, 16)
+    if str_digests == 'last':
+        digests = last
+    else:
+        digests = (int(str_digest, 16)
+                   for str_digest in str_digests.split(','))
+
+    for digest in digests:
         for tag in new_tags:
             add_tag(digest, tag)
 
@@ -323,24 +344,44 @@ def cmd_remove(str_digests):
 
     Remove all tags from given files and delete them from storage.
 
+    Also accepts a special keyword 'last' to remove the most recently accessed
+    files.
+    Does not change 'last'.
+
     filenames: list of digests of files to remove.
+                 OR 'last' keyword.
     """
-    for str_digest in str_digests:
-        digest = int(str_digest, 16)
+    if str_digests[0] == 'last':
+        digests = last
+    else:
+        digests = (int(str_digest, 16)
+                   for str_digest in str_digests)
+
+    for digest in digests:
         unstore(digest)
         for t in files[digest].copy():
             del_tag(digest, t)
         files.pop(digest)
 
 
-def cmd_untag(str_digest, del_tags):
+def cmd_untag(str_digests, del_tags):
     """Perform 'untag' command.
 
-    Remove given tags from given file (string digest).
+    Remove given tags from given files (string digests).
+
+    Also accepts a special keyword 'last' to untag the most recently accessed
+    files.
+    Does not change 'last'.
     """
-    digest = int(str_digest, 16)
-    for tag in del_tags:
-        del_tag(digest, tag)
+    if str_digests == 'last':
+        digests = last
+    else:
+        digests = (int(str_digest, 16)
+                   for str_digest in str_digests.split(','))
+
+    for digest in digests:
+        for tag in del_tags:
+            del_tag(digest, tag)
 
 
 def cmd_list(queries):
@@ -348,6 +389,8 @@ def cmd_list(queries):
 
     Print out all files that match the query. Query should be hard quoted
     (with single quotes) for your own good.
+
+    Changes 'last' to contain the (int) digests of the files listed.
 
     Accepted query syntax is:
     - Nothing (or whitespace) between tokens means 'AND';
@@ -367,10 +410,15 @@ def cmd_list(queries):
 
     queries: list of string queries.
     """
+    global last
+    tmp_last = []
+
     query = " ".join(queries)
     matches = select_by_tags(query)
     for file in matches:
         print("{:0128x}: {}".format(file, ", ".join(files[file])))
+
+    last = tuple(set(matches))
 
 
 def main():
