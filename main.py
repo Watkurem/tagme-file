@@ -18,6 +18,7 @@ import sys
 HOME = os.path.expanduser("~/.tagme-file/")
 FILES = HOME + "files.tmf"
 TAGS = HOME + "tags.tmf"
+LAST = HOME + "last.tmf"
 STORAGE = HOME + "storage/"
 HASH_BUFFER_SIZE = 2**20  # 1 MiB
 
@@ -27,6 +28,11 @@ if (os.path.exists(FILES) and os.path.exists(TAGS)):
 else:
     files = {}
     tags = {}
+
+if os.path.exists(LAST):
+    last = pickle.load(open(LAST, "rb"))
+else:
+    last = ()
 
 
 def hash_file_sha3_512(file):
@@ -394,6 +400,7 @@ def main():
 
     pickle.dump(files, open(FILES, "wb"))
     pickle.dump(tags, open(TAGS, "wb"))
+    pickle.dump(last, open(LAST, "wb"))
 
 
 if __name__ == "__main__":
