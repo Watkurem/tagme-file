@@ -22,6 +22,14 @@ LAST = HOME + "last.tmf"
 STORAGE = HOME + "storage/"
 HASH_BUFFER_SIZE = 2**20  # 1 MiB
 
+# 'files' and 'tags' are dictionaries that store, respectively:
+# - The (int) file digests as keys and lists of those files' (string) tags as
+#   values;
+# - The (string) tags as keys and lists of (int) file digests tagged with those
+#   tags as values
+# tagme-file will attempt to load 'files' and 'tags' from the paths stored in
+# FILES and TAGS respectively. Then, at exit, said files will be overwritten or
+# created, if they did not exist.
 if (os.path.exists(FILES) and os.path.exists(TAGS)):
     files = pickle.load(open(FILES, "rb"))
     tags = pickle.load(open(TAGS, "rb"))
@@ -29,6 +37,13 @@ else:
     files = {}
     tags = {}
 
+# 'last' is a tuple that stores the last accessed (int) file digests. It is
+# useful for situations like the following example and greatly simplifies
+# user's interaction with the program.
+# Example:
+# $ tagme-file add f1 f2 f3
+# $ tagme-file tag last t1 t2 t3
+# As a result, files f1, f2, f3 will be tagged with tags t1, t2, t3.
 if os.path.exists(LAST):
     last = pickle.load(open(LAST, "rb"))
 else:
