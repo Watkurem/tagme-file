@@ -334,6 +334,36 @@ def cmd_untag(str_digest, del_tags):
         del_tag(digest, tag)
 
 
+def cmd_list(queries):
+    """Perform 'list' command.
+
+    Print out all files that match the query. Query should be hard quoted
+    (with single quotes) for your own good.
+
+    Accepted query syntax is:
+    - Nothing (or whitespace) between tokens means 'AND';
+    - '|' means 'OR';
+    - '!' means NOT (unary).
+    All other characters are considered parts of tokens (tags).
+
+    As you can see, some symbols are used that the shell also employs for
+    it's own need. That's where hard quoting comes into play.
+
+    Whitespace may be not quoted. For example, these invocations will
+    produce identical results:
+    - tagme-file list 'tag1 tag2 (tag3 | tag4) !tag5 !(tag6 | tag7)'
+    - tagme-file list tag1 tag2 '(tag3 | tag4)' '!tag5 !(tag6 | tag7)'
+    - tagme-file list tag1 tag2 \(tag3 \| tag4\) \!tag5 \!\(tag6 \| tag7 \)
+    First approach is strongly recommended.
+
+    queries: list of string queries.
+    """
+    query = " ".join(queries)
+    matches = select_by_tags(query)
+    for file in matches:
+        print("{:0128x}: {}".format(file, ", ".join(files[file])))
+
+
 def main():
     """Run the tagme-file program; entry point."""
     os.umask(0o077)
@@ -356,6 +386,8 @@ def main():
         cmd_remove(sys.argv[2:])
     elif cmd == "untag":
         cmd_untag(sys.argv[2], sys.argv[3:])
+    elif cmd == "list":
+        cmd_list(sys.argv[2:])
 
     pickle.dump(files, open(FILES, "wb"))
     pickle.dump(tags, open(TAGS, "wb"))
