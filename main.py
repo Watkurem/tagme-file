@@ -19,24 +19,28 @@ import sys
 HOME = os.path.expanduser("~/.tagme-file/")
 FILES = HOME + "files.tmf"
 TAGS = HOME + "tags.tmf"
+EXT = HOME + "ext.tmf"
 LAST = HOME + "last.tmf"
 STORAGE = HOME + "storage/"
 HASH_BUFFER_SIZE = 2**20  # 1 MiB
 
-# 'files' and 'tags' are dictionaries that store, respectively:
+# 'files', 'tags' and 'extensions' are dictionaries that store, respectively:
 # - The (int) file digests as keys and lists of those files' (string) tags as
 #   values;
 # - The (string) tags as keys and lists of (int) file digests tagged with those
-#   tags as values
-# tagme-file will attempt to load 'files' and 'tags' from the paths stored in
-# FILES and TAGS respectively. Then, at exit, said files will be overwritten or
-# created, if they did not exist.
-if (os.path.exists(FILES) and os.path.exists(TAGS)):
+#   tags as values;
+# - The (int) file digests as keys and (string) extensions of the files.
+# tagme-file will attempt to load 'files', 'tags' and 'extensions' from the
+# paths stored in FILES, TAGS and EXT respectively. Then, at exit, said files
+# will be overwritten or created, if they did not exist.
+if (os.path.exists(FILES) and os.path.exists(TAGS) and os.path.exists(EXT)):
     files = pickle.load(open(FILES, "rb"))
     tags = pickle.load(open(TAGS, "rb"))
+    extensions = pickle.load(open(EXT, "rb"))
 else:
     files = {}
     tags = {}
+    extensions = {}
 
 # 'last' is a tuple that stores the last accessed (int) file digests. It is
 # useful for situations like the following example and greatly simplifies
@@ -582,6 +586,7 @@ def main():
 
     pickle.dump(files, open(FILES, "wb"))
     pickle.dump(tags, open(TAGS, "wb"))
+    pickle.dump(extensions, open(EXT, "wb"))
     pickle.dump(last, open(LAST, "wb"))
 
 
