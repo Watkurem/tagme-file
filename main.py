@@ -79,7 +79,7 @@ def hash_file_sha3_512(file):
                 break
             hasher.update(data)
 
-    return hasher.hexdigest()
+    return int(hasher.hexdigest(), 16)
 
 
 def store(file):
@@ -97,7 +97,8 @@ def store(file):
 
     return: hash of the file as int.
     """
-    str_h = hash_file_sha3_512(file)
+    h = hash_file_sha3_512(file)
+    str_h = digest_to_str(h)
 
     prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
     stored_file = STORAGE + prefix + str_h[4:]
@@ -105,7 +106,7 @@ def store(file):
     os.makedirs(STORAGE + prefix, exist_ok=True)
     shutil.copy2(file, stored_file)
 
-    return int(str_h, 16)
+    return h
 
 
 def unstore(digest):
@@ -113,7 +114,7 @@ def unstore(digest):
 
     digest: a digest of file to unstore
     """
-    str_h = "{:0128x}".format(digest)
+    str_h = digest_to_str(digest)
 
     prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
     stored_file = STORAGE + prefix + str_h[4:]
@@ -132,7 +133,7 @@ def copy_out(digest):
 
     digest: a digest of file to copy
     """
-    str_h = "{:0128x}".format(digest)
+    str_h = digest_to_str(digest)
 
     prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
     stored_file = STORAGE + prefix + str_h[4:]
@@ -149,7 +150,7 @@ def file_stored(digest):
 
     return: bool
     """
-    str_h = "{:0128x}".format(digest)
+    str_h = digest_to_str(digest)
 
     prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
     stored_file = STORAGE + prefix + str_h[4:]
@@ -342,8 +343,8 @@ def cmd_describe_files():
     """
     global files
 
-    for file, tags in files.items():
-        print("{:0128x}: {}".format(file, ", ".join(tags)))
+    for digest, tags in files.items():
+        print("{}: {}".format(digest_to_str(digest), ", ".join(tags)))
 
 
 def cmd_describe_tags():
@@ -356,8 +357,8 @@ def cmd_describe_tags():
     global tags
 
     for tag, files in tags.items():
-        hex_digests = ["{:0128x}".format(file) for file in files]
-        print("{:32}: {}".format(tag, ", ".join(hex_digests)))
+        str_dgs = [digest_to_str(digest) for digest in files]
+        print("{:32}: {}".format(tag, ", ".join(hex_dgs)))
 
 
 def cmd_tag(str_digests, new_tags):
@@ -381,7 +382,7 @@ def cmd_tag(str_digests, new_tags):
     elif str_digests == 'all':
         digests = files.keys()
     else:
-        digests = (int(str_digest, 16)
+        digests = (str_to_digest(str_digest)
                    for str_digest in str_digests.split(','))
 
     for digest in digests:
@@ -409,7 +410,7 @@ def cmd_remove(str_digests):
     elif str_digests[0] == 'all':
         digests = files.keys()
     else:
-        digests = (int(str_digest, 16)
+        digests = (str_to_digest(str_digest)
                    for str_digest in str_digests)
 
     for digest in digests:
@@ -441,7 +442,7 @@ def cmd_untag(str_digests, del_tags):
     elif str_digests == 'all':
         digests = files.keys()
     else:
-        digests = (int(str_digest, 16)
+        digests = (str_to_digest(str_digest)
                    for str_digest in str_digests.split(','))
 
     for digest in digests:
@@ -481,7 +482,7 @@ def cmd_list(queries):
     query = " ".join(queries)
     matches = select_by_tags(query)
     for digest in matches:
-        print("{:0128x}: {}".format(digest, ", ".join(files[digest])))
+        print("{}: {}".format(digest_to_str(digest), ", ".join(files[digest])))
 
     last = tuple(set(matches))
 
@@ -506,7 +507,7 @@ def cmd_get(str_digests):
     elif str_digests[0] == 'all':
         digests = files.keys()
     else:
-        digests = (int(str_digest, 16)
+        digests = (str_to_digest(str_digest)
                    for str_digest in str_digests)
 
     for digest in digests:
