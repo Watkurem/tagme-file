@@ -110,6 +110,20 @@ def store(file):
     os.makedirs(STORAGE + prefix, exist_ok=True)
     shutil.copy2(file, stored_file)
 
+    files[h] = []
+
+    # The case of files like '.hidden' where the period is first symbol
+    basename = os.path.basename(file)
+    if basename[0] == '.':
+        ext = None
+    else:
+        try:
+            ext = file.split(".", 1)[1]
+        except IndexError:
+            ext = None
+
+    extensions[h] = ext
+
     return h
 
 
@@ -131,22 +145,28 @@ def unstore(digest):
                 e.errno == 39):
             raise
 
+    extensions.pop(digest)
+
 
 def copy_out(digest):
     """Copy a file from storage to current directory.
 
     digest: a digest of file to copy
     """
+    if not file_stored(digest):
+        return
+
     str_h = digest_to_str(digest)
 
     prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
     stored_file = STORAGE + prefix + str_h[4:]
 
-    try:
-        shutil.copy2(stored_file, os.getcwd())
-    except OSError as e:
-        if not e.errno == 2:
-            raise
+    if extensions[digest] is not None:
+        shutil.copy2(stored_file,
+                     "{}/{}.{}".format(os.getcwd(), str_h, extensions[digest]))
+    else:
+        shutil.copy2(stored_file,
+                     "{}/{}".format(os.getcwd(), str_h))
 
 
 def file_stored(digest):
@@ -159,7 +179,10 @@ def file_stored(digest):
     prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
     stored_file = STORAGE + prefix + str_h[4:]
 
-    return os.path.exists(stored_file)
+    # Kinda assert
+    assert(os.path.exists(stored_file) == (digest in files))
+
+    return (os.path.exists(stored_file) and digest in files)
 
 
 def add_tag(dg, t):
@@ -184,11 +207,7 @@ def add_tag(dg, t):
     if not file_stored(dg):
         return
 
-    try:
-        if t not in files[dg]:
-            files[dg].append(t)
-    except KeyError:
-        files[dg] = [t]
+    files[dg].append(t)
 
     try:
         if dg not in tags[t]:
