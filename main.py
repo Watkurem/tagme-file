@@ -8,6 +8,7 @@ to them, and retrieve files by tags or their combinations.
 This module should most likely not be imported.
 """
 
+import base64
 import hashlib
 import os
 import pickle
@@ -48,6 +49,16 @@ if os.path.exists(LAST):
     last = pickle.load(open(LAST, "rb"))
 else:
     last = ()
+
+
+def digest_to_str(digest):
+    ascii_b64 = base64.urlsafe_b64encode(digest.to_bytes(64, "little"))[:-2]
+    return str(ascii_b64, "ascii")
+
+
+def str_to_digest(str_digest):
+    ascii_b64 = bytes(str_digest, 'ascii') + b'=='
+    return int.from_bytes(base64.urlsafe_b64decode(ascii_b64), "little")
 
 
 def hash_file_sha3_512(file):
