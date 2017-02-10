@@ -502,6 +502,43 @@ def cmd_get(str_digests):
         copy_out(digest)
 
 
+def cmd_select(queries):
+    """Perform 'select' command.
+
+    Copy all files that match the query to the current directory. Query should
+    be hard quoted (with single quotes) for your own good.
+
+    Changes 'last' to contain the (int) digests of the files copied.
+
+    Accepted query syntax is:
+    - Nothing (or whitespace) between tokens means 'AND';
+    - '|' means 'OR';
+    - '!' means NOT (unary).
+    All other characters are considered parts of tokens (tags).
+
+    As you can see, some symbols are used that the shell also employs for
+    it's own need. That's where hard quoting comes into play.
+
+    Whitespace may be not quoted. For example, these invocations will
+    produce identical results:
+    - tagme-file list 'tag1 tag2 (tag3 | tag4) !tag5 !(tag6 | tag7)'
+    - tagme-file list tag1 tag2 '(tag3 | tag4)' '!tag5 !(tag6 | tag7)'
+    - tagme-file list tag1 tag2 \(tag3 \| tag4\) \!tag5 \!\(tag6 \| tag7 \)
+    First approach is strongly recommended.
+
+    queries: list of string queries.
+    """
+    global last
+    tmp_last = []
+
+    query = " ".join(queries)
+    matches = select_by_tags(query)
+    for digest in matches:
+        copy_out(digest)
+
+    last = tuple(set(matches))
+
+
 def main():
     """Run the tagme-file program; entry point."""
     os.umask(0o077)
@@ -528,6 +565,8 @@ def main():
         cmd_list(sys.argv[2:])
     elif cmd == "get":
         cmd_get(sys.argv[2:])
+    elif cmd == "select":
+        cmd_select(sys.argv[2:])
 
     pickle.dump(files, open(FILES, "wb"))
     pickle.dump(tags, open(TAGS, "wb"))
