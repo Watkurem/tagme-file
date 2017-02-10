@@ -475,6 +475,33 @@ def cmd_list(queries):
     last = tuple(set(matches))
 
 
+def cmd_get(str_digests):
+    """Perform 'get' command.
+
+    Copy given files from storage to current directory.
+
+    Also accepts a special keyword 'last' to remove the most recently accessed
+    files.
+    Also accepts a special keyword 'all'. Will remove all currently stored
+    files.
+
+    Does not change 'last'.
+
+    str_digests: list of digests of files to remove.
+                 OR keywords: 'last', 'all'.
+    """
+    if str_digests[0] == 'last':
+        digests = last
+    elif str_digests[0] == 'all':
+        digests = files.keys()
+    else:
+        digests = (int(str_digest, 16)
+                   for str_digest in str_digests)
+
+    for digest in digests:
+        copy_out(digest)
+
+
 def main():
     """Run the tagme-file program; entry point."""
     os.umask(0o077)
@@ -499,6 +526,8 @@ def main():
         cmd_untag(sys.argv[2], sys.argv[3:])
     elif cmd == "list":
         cmd_list(sys.argv[2:])
+    elif cmd == "get":
+        cmd_get(sys.argv[2:])
 
     pickle.dump(files, open(FILES, "wb"))
     pickle.dump(tags, open(TAGS, "wb"))
