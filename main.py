@@ -240,7 +240,7 @@ def to_rpn(query):
     for x, next in zip(input, input[1:] + [None]):
         if x == '!':
             stack.append(x)
-        elif x =='|':
+        elif x == '|':
             while stack[-1] in ('+', '|'):
                 output.append(stack.pop())
             stack.append(x)
