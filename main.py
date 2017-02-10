@@ -469,8 +469,8 @@ def cmd_list(queries):
 
     query = " ".join(queries)
     matches = select_by_tags(query)
-    for file in matches:
-        print("{:0128x}: {}".format(file, ", ".join(files[file])))
+    for digest in matches:
+        print("{:0128x}: {}".format(digest, ", ".join(files[digest])))
 
     last = tuple(set(matches))
 
