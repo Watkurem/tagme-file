@@ -23,6 +23,8 @@ LAST = HOME + "last.tmf"
 STORAGE = HOME + "storage/"
 HASH_BUFFER_SIZE = 2**20  # 1 MiB
 
+REMEMBER_OLD_EXT = True
+
 # 'files' and 'tags' are dictionaries that store, respectively:
 # - The (int) file digests as keys and lists of those files' (string) tags as
 #   values;
@@ -655,6 +657,38 @@ def cmd_select(queries):
     last = tuple(set(matches))
 
 
+def cmd_update(filenames):
+    """Perform 'update' command.
+
+    Update stored copies of given files according to the digests contained in
+    their names.
+
+    Changes last to contain the (int) digests of the files updated.
+
+    Also accepts a special keyword 'all'. Will update all files in current
+    directory.
+
+    files: sequence of file names to update
+    """
+    for filename in filenames:
+        name, ext = split_name_ext(filename)
+        digest = str_to_digest(name)
+
+        stored_ext = get_ext(digest)
+        if stored_ext != ext:
+            add_tag(digest, 'ext/' + ext)
+            if not REMEMBER_OLD_EXT:
+                del_tag(digest, 'ext/' + stored_ext)
+
+        new_digest = store(filename)
+        if new_digest != digest:
+            unstore(digest)
+            for t in files[digest].copy():
+                del_tag(digest, t)
+                add_tag(new_digest, t)
+            files.pop(digest)
+
+
 def main():
     """Run the tagme-file program; entry point."""
     os.umask(0o077)
@@ -683,6 +717,8 @@ def main():
         cmd_get(sys.argv[2:])
     elif cmd == "select":
         cmd_select(sys.argv[2:])
+    elif cmd == "update":
+        cmd_update(sys.argv[2:])
 
     pickle.dump(files, open(FILES, "wb"))
     pickle.dump(tags, open(TAGS, "wb"))
