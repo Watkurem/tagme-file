@@ -53,6 +53,10 @@ else:
     last = ()
 
 
+class AmbiguousPartialDigestError(Exception):
+    pass
+
+
 def digest_to_str(digest):
     """Convert a digest from int to base64 string representation.
 
@@ -126,6 +130,62 @@ def get_ext(digest):
     except StopIteration:
         return None
 
+
+def part_str_to_digest(part_str_digest):
+    """Recover full digest from it's partial string representation.
+
+    If full string representation (86 characters) given, falls through to
+    str_to_digest. Otherwise, unholy bitwise magic is performed to recover
+    partial int from little-endian base64 and compare it with stored digests.
+
+    Will not stop on first match, so will detect if more than one digest
+    matches partial representation. In such case, AmbiguousPartialDigestError
+    exception will be raised.
+
+    part_str_digest: partial string representation of digest, should be in
+                     little-endian url-safe base64 encoding
+
+    return: full digest matching partial string representation given, or None
+            if no digest matches
+    """
+    str_len = len(part_str_digest)
+
+    if str_len == 86:
+        return str_to_digest(part_str_digest)
+
+    problems = False
+
+    if str_len % 4 == 3:
+        part_str_digest = part_str_digest + '='
+    elif str_len % 4 == 2:
+        part_str_digest = part_str_digest + '=='
+    elif str_len % 4 == 1:
+        part_str_digest = part_str_digest + 'A=='
+        problems = True
+
+    part_digest = int.from_bytes(
+        base64.urlsafe_b64decode(part_str_digest), 'little')
+
+    mask = 1
+    while(mask <= part_digest):
+        mask <<= 8
+    mask -= 1
+
+    if problems:
+        counter_mask = 0x03
+        while(counter_mask << 8 <= mask):
+            counter_mask <<= 8
+        mask &= ~counter_mask
+
+    candidate = None
+    for digest in files:
+        if digest & mask == part_digest:
+            if candidate is None:
+                candidate = digest
+            else:
+                raise AmbiguousPartialDigestError
+
+    return candidate
 
 
 def hash_file_sha3_512(file):
