@@ -321,7 +321,8 @@ def add_tag(dg, t):
     if not file_stored(dg):
         return
 
-    files[dg].append(t)
+    if t not in files[dg]:
+        files[dg].append(t)
 
     try:
         if dg not in tags[t]:
