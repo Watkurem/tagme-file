@@ -716,7 +716,6 @@ def cmd_list(queries):
                 digest_to_str(digest)[:diglen], '', ", ".join(files[digest]),
                 extlen=extlen))
 
-
     last = tuple(set(matches))
 
 
