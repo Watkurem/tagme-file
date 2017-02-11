@@ -163,6 +163,10 @@ def store(file):
     return: hash of the file as int.
     """
     h = hash_file_sha3_512(file)
+
+    if file_stored(h):
+        return h
+
     str_h = digest_to_str(h)
 
     prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
