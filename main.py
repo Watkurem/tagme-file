@@ -19,28 +19,24 @@ import sys
 HOME = os.path.expanduser("~/.tagme-file/")
 FILES = HOME + "files.tmf"
 TAGS = HOME + "tags.tmf"
-EXT = HOME + "ext.tmf"
 LAST = HOME + "last.tmf"
 STORAGE = HOME + "storage/"
 HASH_BUFFER_SIZE = 2**20  # 1 MiB
 
-# 'files', 'tags' and 'extensions' are dictionaries that store, respectively:
+# 'files' and 'tags' are dictionaries that store, respectively:
 # - The (int) file digests as keys and lists of those files' (string) tags as
 #   values;
 # - The (string) tags as keys and lists of (int) file digests tagged with those
 #   tags as values;
-# - The (int) file digests as keys and (string) extensions of the files.
-# tagme-file will attempt to load 'files', 'tags' and 'extensions' from the
-# paths stored in FILES, TAGS and EXT respectively. Then, at exit, said files
-# will be overwritten or created, if they did not exist.
-if (os.path.exists(FILES) and os.path.exists(TAGS) and os.path.exists(EXT)):
+# tagme-file will attempt to load 'files' and 'tags' from the paths stored in
+# FILES and TAGS respectively. Then, at exit, said files will be overwritten or
+# created, if they did not exist.
+if (os.path.exists(FILES) and os.path.exists(TAGS)):
     files = pickle.load(open(FILES, "rb"))
     tags = pickle.load(open(TAGS, "rb"))
-    extensions = pickle.load(open(EXT, "rb"))
 else:
     files = {}
     tags = {}
-    extensions = {}
 
 # 'last' is a tuple that stores the last accessed (int) file digests. It is
 # useful for situations like the following example and greatly simplifies
@@ -110,6 +106,26 @@ def split_name_ext(filename):
     return name, ext
 
 
+def get_ext(digest):
+    """Return the extension associated with given digest.
+
+    Currently extension is stored as special tag 'ext/<extension>'. First
+    occurence of said tag in the file's tag list is considered current
+    extension
+
+    digest: digest to look up the extension for
+
+    return: string extension (without period prefix) or None if no extension is
+            associated with digest
+    """
+    try:
+        return next((tag[4:] for tag in files[digest]
+                     if tag.startswith('ext/')))
+    except StopIteration:
+        return None
+
+
+
 def hash_file_sha3_512(file):
     """Perform sha3_512 hash on an arbitrary file and return the digest.
 
@@ -157,18 +173,6 @@ def store(file):
 
     files[h] = []
 
-    # The case of files like '.hidden' where the period is first symbol
-    basename = os.path.basename(file)
-    if basename[0] == '.':
-        ext = None
-    else:
-        try:
-            ext = file.split(".", 1)[1]
-        except IndexError:
-            ext = None
-
-    extensions[h] = ext
-
     return h
 
 
@@ -190,8 +194,6 @@ def unstore(digest):
                 e.errno == 39):
             raise
 
-    extensions.pop(digest)
-
 
 def copy_out(digest):
     """Copy a file from storage to current directory.
@@ -206,9 +208,10 @@ def copy_out(digest):
     prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
     stored_file = STORAGE + prefix + str_h[4:]
 
-    if extensions[digest] is not None:
+    ext = get_ext(digest)
+    if ext is not None:
         shutil.copy2(stored_file,
-                     "{}/{}.{}".format(os.getcwd(), str_h, extensions[digest]))
+                     "{}/{}.{}".format(os.getcwd(), str_h, ext))
     else:
         shutil.copy2(stored_file,
                      "{}/{}".format(os.getcwd(), str_h))
@@ -395,9 +398,14 @@ def cmd_add(filenames):
     tmp_last = []
 
     for filename in filenames:
-        sha3_hash = store(filename)
-        add_tag(sha3_hash, "name/" + os.path.basename(filename))
-        tmp_last.append(sha3_hash)
+        sha3_digest = store(filename)
+
+        name, ext = split_name_ext(filename)
+        add_tag(sha3_digest, "name/" + name)
+        if ext is not None:
+            add_tag(sha3_digest, "ext/" + ext)
+
+        tmp_last.append(sha3_digest)
 
     last = tuple(set(tmp_last))
 
@@ -411,8 +419,19 @@ def cmd_describe_files():
     """
     global files
 
+    extensions = (get_ext(digest) for digest in files)
+    extlen = max(len(ext) if ext is not None else 0 for ext in extensions) + 1
+
     for digest, tags in files.items():
-        print("{}: {}".format(digest_to_str(digest), ", ".join(tags)))
+        ext = get_ext(digest)
+        if ext is not None:
+            print("{} | {:^{extlen}} | {}".format(
+                digest_to_str(digest), '.' + ext, ", ".join(tags),
+                extlen=extlen))
+        else:
+            print("{} | {:{extlen}} | {}".format(
+                digest_to_str(digest), '', ", ".join(tags),
+                extlen=extlen))
 
 
 def cmd_describe_tags():
@@ -549,8 +568,21 @@ def cmd_list(queries):
 
     query = " ".join(queries)
     matches = select_by_tags(query)
+
+    extensions = (get_ext(digest) for digest in matches)
+    extlen = max(len(ext) if ext is not None else 0 for ext in extensions) + 1
+
     for digest in matches:
-        print("{}: {}".format(digest_to_str(digest), ", ".join(files[digest])))
+        ext = get_ext(digest)
+        if ext is not None:
+            print("{} | {:^{extlen}} | {}".format(
+                digest_to_str(digest), '.' + ext, ", ".join(files[digest]),
+                extlen=extlen))
+        else:
+            print("{} | {:{extlen}} | {}".format(
+                digest_to_str(digest), '', ", ".join(files[digest]),
+                extlen=extlen))
+
 
     last = tuple(set(matches))
 
@@ -650,7 +682,6 @@ def main():
 
     pickle.dump(files, open(FILES, "wb"))
     pickle.dump(tags, open(TAGS, "wb"))
-    pickle.dump(extensions, open(EXT, "wb"))
     pickle.dump(last, open(LAST, "wb"))
 
 
