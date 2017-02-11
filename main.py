@@ -56,6 +56,13 @@ else:
 
 
 def digest_to_str(digest):
+    """Convert a digest from int to base64 string representation.
+
+    digest: 512-bit int digest that will be stringified
+
+    return: 86-character string containing little-endian base64 representation
+            of digest with padding '==' stripped
+    """
     ascii_b64 = base64.urlsafe_b64encode(digest.to_bytes(64, "little"))[:-2]
     return str(ascii_b64, "ascii")
 
