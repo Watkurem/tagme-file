@@ -68,6 +68,13 @@ def digest_to_str(digest):
 
 
 def str_to_digest(str_digest):
+    """Convert a little-endian base64 string representation of digest to int.
+
+    str_digest: 86-character string containing little-endian base64
+                representation of digest with padding '==' stripped
+
+    return: 512-bit int digest
+    """
     ascii_b64 = bytes(str_digest, 'ascii') + b'=='
     return int.from_bytes(base64.urlsafe_b64decode(ascii_b64), "little")
 
