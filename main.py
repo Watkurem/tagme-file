@@ -65,6 +65,37 @@ def str_to_digest(str_digest):
     return int.from_bytes(base64.urlsafe_b64decode(ascii_b64), "little")
 
 
+def split_name_ext(filename):
+    """Split a filename into name-extension pair.
+
+    Take note: split_name_ext("file.tar.xz") => ("file", "tar.xz"),
+    not ("file.tar", "xz")
+
+    filename: a string filename. May be full filename (with path)
+
+    return: (name, ext)
+    name: name part of filename (without path)
+    ext: extension part of filename
+    """
+    basename = os.path.basename(filename)
+
+    # The case of files like '.hidden' where the period is first symbol
+    if basename[0] == '.':
+        name = basename
+        ext = None
+    # The case of other files
+    else:
+        split_name = basename.split(".", 1)
+        try:
+            name = split_name[0]
+            ext = split_name[1]
+        except IndexError:
+            name = basename
+            ext = None
+
+    return name, ext
+
+
 def hash_file_sha3_512(file):
     """Perform sha3_512 hash on an arbitrary file and return the digest.
 
