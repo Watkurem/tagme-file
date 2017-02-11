@@ -23,6 +23,7 @@ LAST = HOME + "last.tmf"
 STORAGE = HOME + "storage/"
 HASH_BUFFER_SIZE = 2**20  # 1 MiB
 
+MINIMAL_STRING_DIGEST_LENGTH = 4
 REMEMBER_OLD_EXT = True
 
 # 'files' and 'tags' are dictionaries that store, respectively:
@@ -489,15 +490,23 @@ def cmd_describe_files():
     extensions = (get_ext(digest) for digest in files)
     extlen = max(len(ext) if ext is not None else 0 for ext in extensions) + 1
 
+    diglen = MINIMAL_STRING_DIGEST_LENGTH
+    while diglen < 86:
+        str_digests = [digest_to_str(digest)[:diglen] for digest in files]
+        if len(str_digests) == len(set(str_digests)):
+            break
+        else:
+            diglen += 1
+
     for digest, tags in files.items():
         ext = get_ext(digest)
         if ext is not None:
             print("{} | {:^{extlen}} | {}".format(
-                digest_to_str(digest), '.' + ext, ", ".join(tags),
+                digest_to_str(digest)[:diglen], '.' + ext, ", ".join(tags),
                 extlen=extlen))
         else:
             print("{} | {:{extlen}} | {}".format(
-                digest_to_str(digest), '', ", ".join(tags),
+                digest_to_str(digest)[:diglen], '', ", ".join(tags),
                 extlen=extlen))
 
 
@@ -510,9 +519,20 @@ def cmd_describe_tags():
     """
     global tags
 
-    for tag, files in tags.items():
-        str_dgs = [digest_to_str(digest) for digest in files]
-        print("{:32}: {}".format(tag, ", ".join(hex_dgs)))
+    diglen = MINIMAL_STRING_DIGEST_LENGTH
+    while diglen < 86:
+        str_digests = [digest_to_str(digest)[:diglen] for digest in files]
+        if len(str_digests) == len(set(str_digests)):
+            break
+        else:
+            diglen += 1
+
+    taglen = max(len(tag) for tag in tags.keys())
+
+    for tag, digests in tags.items():
+        str_dgs = [digest_to_str(digest)[:diglen] for digest in digests]
+        print("{:{taglen}} | {}".format(
+            tag, ", ".join(str_dgs), taglen=taglen))
 
 
 def cmd_tag(str_digests, new_tags):
@@ -675,15 +695,25 @@ def cmd_list(queries):
     extensions = (get_ext(digest) for digest in matches)
     extlen = max(len(ext) if ext is not None else 0 for ext in extensions) + 1
 
+    diglen = MINIMAL_STRING_DIGEST_LENGTH
+    while diglen < 86:
+        str_digests = [digest_to_str(digest)[:diglen] for digest in files]
+        if len(str_digests) == len(set(str_digests)):
+            break
+        else:
+            diglen += 1
+
     for digest in matches:
         ext = get_ext(digest)
         if ext is not None:
             print("{} | {:^{extlen}} | {}".format(
-                digest_to_str(digest), '.' + ext, ", ".join(files[digest]),
+                digest_to_str(digest)[:diglen],
+                '.' + ext,
+                ", ".join(files[digest]),
                 extlen=extlen))
         else:
             print("{} | {:{extlen}} | {}".format(
-                digest_to_str(digest), '', ", ".join(files[digest]),
+                digest_to_str(digest)[:diglen], '', ", ".join(files[digest]),
                 extlen=extlen))
 
 
