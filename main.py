@@ -109,9 +109,9 @@ def split_name_ext(filename):
 def get_ext(digest):
     """Return the extension associated with given digest.
 
-    Currently extension is stored as special tag 'ext/<extension>'. First
-    occurence of said tag in the file's tag list is considered current
-    extension
+    Currently extension is stored as special tag 'ext/<extension>'. Last
+    occurence of said tag in the file's tag list is considered most recent and
+    current extension
 
     digest: digest to look up the extension for
 
@@ -119,7 +119,7 @@ def get_ext(digest):
             associated with digest
     """
     try:
-        return next((tag[4:] for tag in files[digest]
+        return next((tag[4:] for tag in reversed(files[digest])
                      if tag.startswith('ext/')))
     except StopIteration:
         return None
