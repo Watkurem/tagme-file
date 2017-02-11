@@ -536,8 +536,20 @@ def cmd_tag(str_digests, new_tags):
     elif str_digests == 'all':
         digests = files.keys()
     else:
-        digests = (str_to_digest(str_digest)
-                   for str_digest in str_digests.split(','))
+        digests = []
+        for str_digest in str_digests.split(','):
+            try:
+                digest = part_str_to_digest(str_digest)
+            except AmbiguousPartialDigestError:
+                print("Error: file reference", str_digest, "is ambiguous! "
+                      "Please use a couple more characters")
+                return
+
+            if digest is None:
+                print("Error: file", str_digest, "is not currently stored!")
+                return
+
+            digests.append(digest)
 
     for digest in digests:
         for tag in new_tags:
@@ -564,8 +576,20 @@ def cmd_remove(str_digests):
     elif str_digests[0] == 'all':
         digests = files.keys()
     else:
-        digests = (str_to_digest(str_digest)
-                   for str_digest in str_digests)
+        digests = []
+        for str_digest in str_digests:
+            try:
+                digest = part_str_to_digest(str_digest)
+            except AmbiguousPartialDigestError:
+                print("Error: file reference", str_digest, "is ambiguous! "
+                      "Please use a couple more characters")
+                return
+
+            if digest is None:
+                print("Error: file", str_digest, "is not currently stored!")
+                return
+
+            digests.append(digest)
 
     for digest in digests:
         unstore(digest)
@@ -596,8 +620,20 @@ def cmd_untag(str_digests, del_tags):
     elif str_digests == 'all':
         digests = files.keys()
     else:
-        digests = (str_to_digest(str_digest)
-                   for str_digest in str_digests.split(','))
+        digests = []
+        for str_digest in str_digests.split(','):
+            try:
+                digest = part_str_to_digest(str_digest)
+            except AmbiguousPartialDigestError:
+                print("Error: file reference", str_digest, "is ambiguous! "
+                      "Please use a couple more characters")
+                return
+
+            if digest is None:
+                print("Error: file", str_digest, "is not currently stored!")
+                return
+
+            digests.append(digest)
 
     for digest in digests:
         for tag in del_tags:
@@ -674,8 +710,20 @@ def cmd_get(str_digests):
     elif str_digests[0] == 'all':
         digests = files.keys()
     else:
-        digests = (str_to_digest(str_digest)
-                   for str_digest in str_digests)
+        digests = []
+        for str_digest in str_digests:
+            try:
+                digest = part_str_to_digest(str_digest)
+            except AmbiguousPartialDigestError:
+                print("Error: file reference", str_digest, "is ambiguous! "
+                      "Please use a couple more characters")
+                return
+
+            if digest is None:
+                print("Error: file", str_digest, "is not currently stored!")
+                return
+
+            digests.append(digest)
 
     for digest in digests:
         copy_out(digest)
