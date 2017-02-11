@@ -214,9 +214,9 @@ def store(file):
     """Put a file into storage and return it's sha3_512 hash digest as int.
 
     Path for a file in storage is generated as so:
-    STORAGE/XX/YY/ZZZ...
-    where XX are first two characters of the string digest, YY are 3rd and 4th,
-    and ZZZ... (filename) are the rest.
+    STORAGE/XX/Y/ZZZ...
+    where XX are first two characters of the string digest, Y is 3rd and
+    ZZZ... (filename) are the rest.
 
     Int is used because this way digests need less memory to store. Smaller
     hash size can be used too, of course, but that is simply not as fun.
@@ -232,8 +232,8 @@ def store(file):
 
     str_h = digest_to_str(h)
 
-    prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
-    stored_file = STORAGE + prefix + str_h[4:]
+    prefix = "{}/{}/{}/".format(str_h[0], str_h[1], str_h[2])
+    stored_file = STORAGE + prefix + str_h[3:]
 
     os.makedirs(STORAGE + prefix, exist_ok=True)
     shutil.copy2(file, stored_file)
@@ -250,8 +250,8 @@ def unstore(digest):
     """
     str_h = digest_to_str(digest)
 
-    prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
-    stored_file = STORAGE + prefix + str_h[4:]
+    prefix = "{}/{}/{}/".format(str_h[0], str_h[1], str_h[2])
+    stored_file = STORAGE + prefix + str_h[3:]
 
     try:
         os.remove(stored_file)
@@ -272,8 +272,8 @@ def copy_out(digest):
 
     str_h = digest_to_str(digest)
 
-    prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
-    stored_file = STORAGE + prefix + str_h[4:]
+    prefix = "{}/{}/{}/".format(str_h[0], str_h[1], str_h[2])
+    stored_file = STORAGE + prefix + str_h[3:]
 
     ext = get_ext(digest)
     if ext is not None:
@@ -291,8 +291,8 @@ def file_stored(digest):
     """
     str_h = digest_to_str(digest)
 
-    prefix = "{}/{}/".format(str_h[:2], str_h[2:4])
-    stored_file = STORAGE + prefix + str_h[4:]
+    prefix = "{}/{}/{}/".format(str_h[0], str_h[1], str_h[2])
+    stored_file = STORAGE + prefix + str_h[3:]
 
     # Kinda assert
     assert(os.path.exists(stored_file) == (digest in files))
